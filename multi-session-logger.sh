@@ -7,7 +7,7 @@ LOG_DIR="$HOME/Documents/claude-logs"
 DATE=$(date +%Y-%m-%d)
 LOG_FILE="$LOG_DIR/$DATE.md"
 SESSION_ID="${CLAUDE_SESSION_ID:-$(date +%s)-$$}"
-SESSION_LOG="$LOG_DIR/sessions/${SESSION_ID}.log"
+SESSION_LOG="$LOG_DIR/sessions/${DATE}-session-${SESSION_ID}.md"
 LOCK_FILE="$LOG_DIR/.${DATE}.lock"
 
 # Create log directories if they don't exist
@@ -79,9 +79,9 @@ merge_session_logs() {
         echo "" >> "$temp_file"
         
         # Merge all session logs for today
-        for session_log in "$LOG_DIR/sessions"/*.log; do
+        for session_log in "$LOG_DIR/sessions"/${DATE}-session-*.md; do
             if [ -f "$session_log" ]; then
-                session_name=$(basename "$session_log" .log)
+                session_name=$(basename "$session_log" .md)
                 echo "### Session: $session_name" >> "$temp_file"
                 cat "$session_log" >> "$temp_file"
                 echo "" >> "$temp_file"
