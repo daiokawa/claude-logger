@@ -1,0 +1,49 @@
+# Test files
+__tests__/
+coverage/
+*.test.js
+*.test.sh
+jest.config.js
+
+# Development files
+.eslintrc.json
+.prettierrc.json
+.eslintignore
+.prettierignore
+
+# CI/CD
+.github/
+
+# Documentation source files
+docs/
+*.md
+!README.md
+!CHANGELOG.md
+!LICENSE
+
+# Session logs
+sessions/
+projects/
+2025-*.md
+2024-*.md
+*.lock
+
+# Development dependencies
+.editorconfig
+.nvmrc
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

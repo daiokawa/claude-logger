@@ -19,7 +19,7 @@ function getSessionFiles(date) {
   if (!fs.existsSync(sessionsDir)) {
     return [];
   }
-  
+
   const files = fs.readdirSync(sessionsDir);
   return files.filter(file => file.startsWith(`${date}-session-`) && file.endsWith('.md'));
 }
@@ -30,30 +30,30 @@ function parseSessionFile(filePath) {
     const content = fs.readFileSync(filePath, 'utf8');
     const lines = content.split('\n');
     const sessionId = path.basename(filePath).match(/session-([^.]+)\.md/)?.[1] || 'unknown';
-    
+
     let entryCount = 0;
     let lastTimestamp = '';
     let totalTokens = 0;
-    
+
     lines.forEach(line => {
       // Count entries (lines starting with -)
       if (line.trim().startsWith('- ')) {
         entryCount++;
       }
-      
+
       // Extract timestamps (lines in format HH:MM)
       const timestampMatch = line.match(/^(\d{2}:\d{2})/);
       if (timestampMatch) {
         lastTimestamp = timestampMatch[1];
       }
-      
+
       // Extract token usage
       const tokenMatch = line.match(/\+?([\d,]+)\s*tokens?/i);
       if (tokenMatch) {
         totalTokens += parseInt(tokenMatch[1].replace(/,/g, ''));
       }
     });
-    
+
     return {
       sessionId,
       entryCount,
@@ -83,20 +83,20 @@ function isSessionActive(filePath) {
 const commands = {
   init: () => {
     console.log('🚀 Initializing Claude Logger...');
-    
+
     // Create directories
     fs.mkdirSync(CLAUDE_LOGS_DIR, { recursive: true });
     fs.mkdirSync(path.join(CLAUDE_LOGS_DIR, 'projects'), { recursive: true });
     fs.mkdirSync(path.join(CLAUDE_LOGS_DIR, 'sessions'), { recursive: true });
-    
+
     // Create initial log file
     const today = new Date().toISOString().split('T')[0];
     const logFile = path.join(CLAUDE_LOGS_DIR, `${today}.md`);
-    
+
     if (!fs.existsSync(logFile)) {
       fs.writeFileSync(logFile, `# ${today} 作業ログ\n\n## Claude Logger initialized\n`);
     }
-    
+
     // Run setup script
     const setupScript = path.join(CLAUDE_LOGGER_DIR, 'setup-claude-logger.sh');
     if (fs.existsSync(setupScript)) {
@@ -107,15 +107,15 @@ const commands = {
         console.error('Setup failed:', error.message);
       }
     }
-    
+
     console.log('✅ Claude Logger initialized!');
     console.log(`📁 Logs directory: ${CLAUDE_LOGS_DIR}`);
   },
-  
+
   start: () => {
     const sessionId = `${Date.now()}-${process.pid}`;
     console.log(`🔄 Starting Claude Logger session: ${sessionId}`);
-    
+
     // Create session environment setup script
     const sessionScript = `
 #!/bin/bash
@@ -125,25 +125,25 @@ source "${CLAUDE_LOGGER_DIR}/multi-session-logger.sh"
 echo "✅ Claude Logger active for this session"
 echo "📝 Session ID: ${sessionId}"
 `;
-    
+
     const tempScript = path.join(os.tmpdir(), `claude-session-${sessionId}.sh`);
     fs.writeFileSync(tempScript, sessionScript, { mode: 0o755 });
-    
+
     console.log('\n⚠️  To activate logging in this terminal, run:');
     console.log(`source ${tempScript}\n`);
     console.log('Or use the wrapper: claude-logged');
   },
-  
-  stats: (args) => {
+
+  stats: args => {
     console.log('📊 Claude Logger - Productivity Stats');
     console.log('═══════════════════════════════════════════════════════');
-    
+
     const period = args[0] || 'today';
     const today = getTodayDate();
-    let dates = [];
-    
+    const dates = [];
+
     // Determine which dates to analyze
-    switch(period) {
+    switch (period) {
       case '--week':
         for (let i = 0; i < 7; i++) {
           const date = new Date();
@@ -151,23 +151,24 @@ echo "📝 Session ID: ${sessionId}"
           dates.push(date.toISOString().split('T')[0]);
         }
         break;
-      case '--yesterday':
+      case '--yesterday': {
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
         dates.push(yesterday.toISOString().split('T')[0]);
         break;
+      }
       case '--today':
       default:
         dates.push(today);
     }
-    
+
     console.log(`Period: ${period}`);
     console.log('');
-    
+
     let totalSessions = 0;
     let totalEntries = 0;
     let totalTokens = 0;
-    
+
     dates.forEach(date => {
       const sessionFiles = getSessionFiles(date);
       sessionFiles.forEach(file => {
@@ -179,13 +180,15 @@ echo "📝 Session ID: ${sessionId}"
         }
       });
     });
-    
+
     console.log(`📅 Sessions: ${totalSessions}`);
     console.log(`📝 Log Entries: ${totalEntries}`);
     console.log(`💰 Token Usage: ${totalTokens.toLocaleString()} tokens`);
-    console.log(`⚡ Avg Entries/Session: ${totalSessions > 0 ? (totalEntries / totalSessions).toFixed(1) : 0}`);
+    console.log(
+      `⚡ Avg Entries/Session: ${totalSessions > 0 ? (totalEntries / totalSessions).toFixed(1) : 0}`
+    );
     console.log('');
-    
+
     if (totalSessions === 0) {
       console.log('💡 No sessions found for the specified period.');
       console.log('   Start a session with:');
@@ -195,15 +198,15 @@ echo "📝 Session ID: ${sessionId}"
       console.log(`💡 Insight: Average ${avgTokensPerSession.toLocaleString()} tokens per session`);
     }
   },
-  
+
   dashboard: () => {
     console.log('🖥️  Claude Logger - Live Dashboard');
     console.log('═══════════════════════════════════════════════════════');
     console.log('');
-    
+
     const today = getTodayDate();
     const sessionFiles = getSessionFiles(today);
-    
+
     if (sessionFiles.length === 0) {
       console.log('❌ No sessions found for today');
       console.log('');
@@ -213,38 +216,40 @@ echo "📝 Session ID: ${sessionId}"
       console.log('Then use: log_entry "Your work description"');
       return;
     }
-    
+
     const sessions = [];
     let activeSessions = 0;
     let totalTokensToday = 0;
-    
+
     sessionFiles.forEach(file => {
       const filePath = path.join(CLAUDE_LOGS_DIR, 'sessions', file);
       const sessionData = parseSessionFile(filePath);
-      
+
       if (sessionData) {
         const active = isSessionActive(filePath);
-        if (active) activeSessions++;
-        
+        if (active) {
+          activeSessions++;
+        }
+
         sessions.push({
           ...sessionData,
           active
         });
-        
+
         totalTokensToday += sessionData.totalTokens;
       }
     });
-    
+
     // Display summary
     console.log(`Active Sessions: ${activeSessions}/${sessions.length}`);
     console.log(`Total Sessions Today: ${sessions.length}`);
     console.log(`Token Usage Today: ${totalTokensToday.toLocaleString()} tokens`);
     console.log('');
-    
+
     // Display individual sessions
     console.log('Session Details:');
     console.log('─────────────────────────────────────────────────');
-    
+
     sessions.forEach((session, index) => {
       const status = session.active ? '🟢' : '⚫';
       console.log(`${status} Session ${index + 1} [${session.sessionId}]`);
@@ -253,7 +258,7 @@ echo "📝 Session ID: ${sessionId}"
       console.log(`   Tokens: ${session.totalTokens.toLocaleString()}`);
       console.log('');
     });
-    
+
     // Check main log file
     const mainLogPath = path.join(CLAUDE_LOGS_DIR, `${today}.md`);
     if (fs.existsSync(mainLogPath)) {
@@ -261,52 +266,53 @@ echo "📝 Session ID: ${sessionId}"
       const mainLogSize = (mainLogStats.size / 1024).toFixed(1);
       console.log(`📄 Main Log: ${today}.md (${mainLogSize} KB)`);
     }
-    
+
     console.log('');
     console.log('💡 Tip: Sessions are marked inactive after 30 minutes');
   },
-  
+
   list: () => {
     console.log('📋 Claude Logger - Session List');
     console.log('═══════════════════════════════════════════════════════');
     console.log('');
-    
+
     const sessionsDir = path.join(CLAUDE_LOGS_DIR, 'sessions');
     if (!fs.existsSync(sessionsDir)) {
       console.log('❌ No sessions directory found');
       return;
     }
-    
-    const files = fs.readdirSync(sessionsDir)
+
+    const files = fs
+      .readdirSync(sessionsDir)
       .filter(file => file.endsWith('.md'))
       .sort()
       .reverse();
-    
+
     if (files.length === 0) {
       console.log('❌ No session files found');
       return;
     }
-    
+
     console.log(`Found ${files.length} session file(s):`);
     console.log('');
-    
+
     files.slice(0, 20).forEach(file => {
       const filePath = path.join(sessionsDir, file);
       const stats = fs.statSync(filePath);
       const size = (stats.size / 1024).toFixed(1);
       const active = isSessionActive(filePath) ? '🟢' : '⚫';
-      
+
       console.log(`${active} ${file} (${size} KB)`);
     });
-    
+
     if (files.length > 20) {
       console.log(`... and ${files.length - 20} more`);
     }
   },
-  
+
   merge: () => {
     console.log('🔄 Merging session logs...');
-    
+
     const mergeScript = path.join(CLAUDE_LOGGER_DIR, 'multi-session-logger.sh');
     if (fs.existsSync(mergeScript)) {
       try {
@@ -337,8 +343,8 @@ if (commands[command]) {
   console.log('  claude-logger merge      - Merge all session logs');
   console.log('');
   console.log('Stats options:');
-  console.log('  claude-logger stats --today      - Today\'s stats (default)');
-  console.log('  claude-logger stats --yesterday  - Yesterday\'s stats');
+  console.log("  claude-logger stats --today      - Today's stats (default)");
+  console.log("  claude-logger stats --yesterday  - Yesterday's stats");
   console.log('  claude-logger stats --week       - Last 7 days');
   console.log('');
   console.log('💸 Remember: Track everything, optimize everything!');

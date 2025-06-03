@@ -38,7 +38,8 @@ release_lock() {
 # Function to log entry to both main log and session log
 log_entry() {
     local message="$1"
-    local timestamp=$(date +"%H:%M")
+    local timestamp
+    timestamp=$(date +"%H:%M")
     
     # Log to session file (no lock needed, unique per session)
     echo "[$timestamp] $message" >> "$SESSION_LOG"
@@ -46,7 +47,8 @@ log_entry() {
     # Log to main file with lock
     if acquire_lock; then
         # Check if date has changed
-        local current_date=$(date +%Y-%m-%d)
+        local current_date
+        current_date=$(date +%Y-%m-%d)
         if [ "$current_date" != "$DATE" ]; then
             DATE="$current_date"
             LOG_FILE="$LOG_DIR/$DATE.md"
@@ -58,9 +60,11 @@ log_entry() {
             echo "" >> "$LOG_FILE"
         fi
         
-        echo "## $timestamp [Session: $SESSION_ID]" >> "$LOG_FILE"
-        echo "$message" >> "$LOG_FILE"
-        echo "" >> "$LOG_FILE"
+        {
+            echo "## $timestamp [Session: $SESSION_ID]"
+            echo "$message"
+            echo ""
+        } >> "$LOG_FILE"
         release_lock
     else
         echo "Warning: Could not acquire lock for logging" >&2
@@ -73,26 +77,32 @@ merge_session_logs() {
         local temp_file="$LOG_DIR/.merge_temp.md"
         
         # Create header
-        echo "# $DATE 作業ログ" > "$temp_file"
-        echo "" >> "$temp_file"
-        echo "## セッション統合ログ ($(date +%H:%M)更新)" >> "$temp_file"
-        echo "" >> "$temp_file"
+        {
+            echo "# $DATE 作業ログ"
+            echo ""
+            echo "## セッション統合ログ ($(date +%H:%M)更新)"
+            echo ""
+        } > "$temp_file"
         
         # Merge all session logs for today
-        for session_log in "$LOG_DIR/sessions"/${DATE}-session-*.md; do
+        for session_log in "$LOG_DIR/sessions/${DATE}-session-"*.md; do
             if [ -f "$session_log" ]; then
                 session_name=$(basename "$session_log" .md)
-                echo "### Session: $session_name" >> "$temp_file"
-                cat "$session_log" >> "$temp_file"
-                echo "" >> "$temp_file"
+                {
+                    echo "### Session: $session_name"
+                    cat "$session_log"
+                    echo ""
+                } >> "$temp_file"
             fi
         done
         
         # Append existing content if any
         if [ -f "$LOG_FILE" ]; then
-            echo "" >> "$temp_file"
-            echo "---" >> "$temp_file"
-            echo "" >> "$temp_file"
+            {
+                echo ""
+                echo "---"
+                echo ""
+            } >> "$temp_file"
             tail -n +4 "$LOG_FILE" >> "$temp_file"  # Skip header
         fi
         
@@ -107,7 +117,7 @@ merge_session_logs() {
 log_command() {
     local cmd="$1"
     shift
-    log_entry "Executing: $cmd $@"
+    log_entry "Executing: $cmd $*"
     "$cmd" "$@"
     local exit_code=$?
     log_entry "Completed: $cmd (exit code: $exit_code)"

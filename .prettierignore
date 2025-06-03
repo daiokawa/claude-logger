@@ -1,0 +1,10 @@
+node_modules/
+coverage/
+*.log
+*.md
+sessions/
+projects/
+2025-*.md
+.git/
+dist/
+build/

@@ -19,10 +19,12 @@ ZSHRC_FILE="$HOME/.zshrc"
 LOGGER_SOURCE="source $CLAUDE_LOGGER_DIR/multi-session-logger.sh"
 
 if ! grep -q "claude-logger" "$ZSHRC_FILE" 2>/dev/null; then
-    echo "" >> "$ZSHRC_FILE"
-    echo "# Claude Logger - Automatic session logging" >> "$ZSHRC_FILE"
-    echo "export CLAUDE_LOGGER_DIR=\"$CLAUDE_LOGGER_DIR\"" >> "$ZSHRC_FILE"
-    echo "$LOGGER_SOURCE" >> "$ZSHRC_FILE"
+    {
+        echo ""
+        echo "# Claude Logger - Automatic session logging"
+        echo "export CLAUDE_LOGGER_DIR=\"$CLAUDE_LOGGER_DIR\""
+        echo "$LOGGER_SOURCE"
+    } >> "$ZSHRC_FILE"
     echo "✅ Added to .zshrc"
 else
     echo "✅ Already configured in .zshrc"

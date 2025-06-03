@@ -62,6 +62,11 @@ You know who you are:
 
 ## 🛠️ Installation
 
+### Prerequisites
+- Node.js 14.0.0 or higher
+- npm or yarn
+- macOS, Linux, or Windows (WSL)
+
 ### Quick Install (Recommended)
 
 ```bash
@@ -73,12 +78,21 @@ This will:
 - Set up automatic logging for all terminals
 - Configure 15-minute interval snapshots
 - Create session tracking directories
-- Add shell integration
+- Add shell integration to ~/.zshrc
+- Set up cron job for automatic log merging
 
 ### Manual Install
 
 ```bash
-npm install -g claude-logger
+# Clone the repository
+git clone https://github.com/daiokawa/claude-logger.git
+cd claude-logger
+
+# Install globally
+npm install -g .
+
+# Initialize
+claude-logger init
 ```
 
 ## 🚀 Usage
@@ -228,19 +242,72 @@ ML-powered analysis of your work patterns. Know which projects will succeed befo
 
 ### Sessions not logging?
 1. Make sure you ran `claude-logger init`
-2. Restart your terminal after init
+2. Restart your terminal after init (or run `source ~/.zshrc`)
 3. Use `claude-logger start` in each terminal
 4. Check `~/Documents/claude-logs/sessions/` for log files
+5. Verify environment variables:
+   ```bash
+   echo $CLAUDE_SESSION_ID
+   echo $CLAUDE_LOGGER_DIR
+   ```
 
 ### Logs not merging?
-Run manually: `claude-logger merge`
+- Run manually: `claude-logger merge`
+- Check cron job: `crontab -l | grep claude-logger`
+- Verify log directory permissions: `ls -la ~/Documents/claude-logs/`
+
+### Common Issues
+
+**"command not found: claude-logger"**
+- Ensure npm global bin is in PATH: `export PATH="$PATH:$(npm bin -g)"`
+- Or use full path: `$(npm bin -g)/claude-logger`
+
+**"Permission denied" errors**
+- Check file permissions: `chmod +x $(which claude-logger)`
+- Ensure log directory is writable: `chmod 755 ~/Documents/claude-logs`
+
+**Sessions not being tracked**
+- Verify the logger is sourced: `type log_entry`
+- Check if session ID is set: `echo $CLAUDE_SESSION_ID`
+- Manually source the logger: `source ~/Documents/claude-logs/multi-session-logger.sh`
 
 ### Need help?
-Create an issue: https://github.com/daiokawa/claude-logger/issues
+- Check existing issues: https://github.com/daiokawa/claude-logger/issues
+- Create a new issue with:
+  - Your OS and Node.js version
+  - Complete error message
+  - Steps to reproduce
 
-## 🤝 Join the Movement
+## 🤝 Contributing
 
-This isn't just a logger. It's a heal for ADHDers like us.
+We welcome contributions! See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
+
+### Quick Start for Contributors
+```bash
+# Fork and clone the repo
+git clone https://github.com/your-username/claude-logger.git
+cd claude-logger
+
+# Install dependencies
+npm install
+
+# Run tests
+npm test
+
+# Check code style
+npm run lint
+npm run format:check
+```
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Built for the Claude Code power user community
+- Inspired by developers who maximize their $200/month subscription
+- Special thanks to all contributors
 
 **Work Smarter. Track Everything. Optimize Relentlessly.**
 
