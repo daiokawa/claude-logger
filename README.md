@@ -60,6 +60,16 @@ You know who you are:
 - ✅ Linux
 - ✅ Windows (WSL)
 
+## 🎉 Version 2.2.0 - Now with 200% More Quality!
+
+### What's New
+- ✨ Complete code refactoring with ESLint & Prettier
+- 🧪 Comprehensive test suite with Jest  
+- 🚀 GitHub Actions CI/CD pipeline
+- 📝 Improved documentation
+- 🐛 Fixed all shellcheck warnings
+- 🔧 Better error handling
+
 ## 🛠️ Installation
 
 ### Prerequisites
@@ -70,6 +80,12 @@ You know who you are:
 ### Quick Install (Recommended)
 
 ```bash
+# From GitHub (Available Now!)
+git clone https://github.com/daiokawa/claude-logger.git
+cd claude-logger
+./install.sh
+
+# From npm (Coming Soon™)
 npm install -g claude-logger
 claude-logger init
 ```
@@ -88,11 +104,15 @@ This will:
 git clone https://github.com/daiokawa/claude-logger.git
 cd claude-logger
 
-# Install globally
-npm install -g .
+# Option 1: Quick install with script
+./install.sh
 
-# Initialize
+# Option 2: Manual install
+npm install -g .
 claude-logger init
+
+# Option 3: Direct one-liner
+curl -fsSL https://raw.githubusercontent.com/daiokawa/claude-logger/main/install.sh | bash
 ```
 
 ## 🚀 Usage
