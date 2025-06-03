@@ -1,9 +1,5 @@
 {
-  "extends": [
-    "eslint:recommended",
-    "plugin:node/recommended",
-    "prettier"
-  ],
+  "extends": ["eslint:recommended", "plugin:node/recommended", "prettier"],
   "env": {
     "node": true,
     "es2021": true,
@@ -13,9 +9,12 @@
     "ecmaVersion": 2021
   },
   "rules": {
-    "node/no-unpublished-require": ["error", {
-      "allowModules": ["jest"]
-    }],
+    "node/no-unpublished-require": [
+      "error",
+      {
+        "allowModules": ["jest"]
+      }
+    ],
     "no-console": "off",
     "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
     "prefer-const": "error",
