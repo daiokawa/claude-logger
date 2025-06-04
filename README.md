@@ -60,15 +60,15 @@ You know who you are:
 - ✅ Linux
 - ✅ Windows (WSL)
 
-## 🎉 Version 2.2.0 - Now with 200% More Quality!
+## 🎉 Version 2.0.0 - Zero Duplicate, Zero Noise!
 
 ### What's New
-- ✨ Complete code refactoring with ESLint & Prettier
-- 🧪 Comprehensive test suite with Jest  
-- 🚀 GitHub Actions CI/CD pipeline
-- 📝 Improved documentation
-- 🐛 Fixed all shellcheck warnings
-- 🔧 Better error handling
+- 🛡️ **Duplicate Prevention**: Automatic detection and prevention of duplicate script loading
+- 🔇 **Silent Operation**: No terminal output pollution - runs completely in background
+- 🧹 **Auto Cleanup**: Smart detection and removal of duplicate configurations
+- 🔒 **Improved Locking**: Enhanced file locking mechanism for better parallel session support
+- 📝 **Better Setup**: Improved setup script with automatic cleanup of old configurations
+- 🚫 **No More Cron Spam**: Removed problematic cron jobs that generated error emails
 
 ## 🛠️ Installation
 

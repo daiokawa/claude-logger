@@ -1,9 +1,17 @@
 #!/bin/bash
 
 # Claude Logger - Multi-session support with file locking
+# Version: 2.0.0
 # Prevents conflicts when multiple Claude sessions write to the same log file
 
-LOG_DIR="$HOME/Documents/claude-logs"
+# Prevent duplicate sourcing - check if already loaded
+if [ -n "$CLAUDE_LOGGER_LOADED" ]; then
+    return 0 2>/dev/null || exit 0
+fi
+export CLAUDE_LOGGER_LOADED=1
+
+# Configuration
+LOG_DIR="${CLAUDE_LOGGER_DIR:-$HOME/Documents/claude-logs}"
 DATE=$(date +%Y-%m-%d)
 LOG_FILE="$LOG_DIR/$DATE.md"
 SESSION_ID="${CLAUDE_SESSION_ID:-$(date +%s)-$$}"
@@ -11,7 +19,7 @@ SESSION_LOG="$LOG_DIR/sessions/${DATE}-session-${SESSION_ID}.md"
 LOCK_FILE="$LOG_DIR/.${DATE}.lock"
 
 # Create log directories if they don't exist
-mkdir -p "$LOG_DIR/sessions"
+mkdir -p "$LOG_DIR/sessions" 2>/dev/null
 
 # Function to acquire lock
 acquire_lock() {
@@ -32,7 +40,7 @@ acquire_lock() {
 
 # Function to release lock
 release_lock() {
-    rm -rf "$LOCK_FILE"
+    rm -rf "$LOCK_FILE" 2>/dev/null
 }
 
 # Function to log entry to both main log and session log
@@ -52,12 +60,18 @@ log_entry() {
         if [ "$current_date" != "$DATE" ]; then
             DATE="$current_date"
             LOG_FILE="$LOG_DIR/$DATE.md"
+            SESSION_LOG="$LOG_DIR/sessions/${DATE}-session-${SESSION_ID}.md"
         fi
         
         # Add header if file doesn't exist
         if [ ! -f "$LOG_FILE" ]; then
-            echo "# $DATE 作業ログ" > "$LOG_FILE"
-            echo "" >> "$LOG_FILE"
+            {
+                echo "# $DATE 作業ログ"
+                echo ""
+                echo "## トークン使用量追跡"
+                echo "累計: 0 tokens"
+                echo ""
+            } > "$LOG_FILE"
         fi
         
         {
@@ -89,7 +103,7 @@ merge_session_logs() {
             if [ -f "$session_log" ]; then
                 session_name=$(basename "$session_log" .md)
                 {
-                    echo "### Session: $session_name"
+                    echo "### $session_name"
                     cat "$session_log"
                     echo ""
                 } >> "$temp_file"
@@ -124,14 +138,10 @@ log_command() {
     return $exit_code
 }
 
-# If called with 'merge' argument, run merge
+# Export session ID for child processes
+export CLAUDE_SESSION_ID="$SESSION_ID"
+
+# If called directly with 'merge' argument, run merge
 if [ "$1" = "merge" ]; then
     merge_session_logs
 fi
-
-# Export functions for use in other scripts
-export -f log_entry
-export -f acquire_lock
-export -f release_lock
-export -f merge_session_logs
-export -f log_command
